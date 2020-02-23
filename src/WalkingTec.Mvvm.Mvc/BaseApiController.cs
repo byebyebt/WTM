@@ -214,7 +214,7 @@ namespace WalkingTec.Mvvm.Mvc
             rv.ConfigInfo = ConfigInfo;
             rv.Cache = Cache;
             rv.LoginUserInfo = LoginUserInfo;
-            rv.DataContextCI = GlobaInfo?.DataContextCI;
+            rv.DataContextCI = ConfigInfo.ConnectionStrings.Where(x => x.Key.ToLower() == CurrentCS.ToLower()).Select(x=>x.DcConstructor).FirstOrDefault();
             rv.DC = this.DC;
             rv.MSD = new ModelStateServiceProvider(ModelState);
             rv.FC = new Dictionary<string, object>();
@@ -401,6 +401,11 @@ namespace WalkingTec.Mvvm.Mvc
         #endregion
 
         #region CreateDC
+        /// <summary>
+        /// Create a new datacontext with current connectionstring and current database type
+        /// </summary>
+        /// <param name="isLog">if true, use defaultlog connection string</param>
+        /// <returns>data context</returns>
         [NonAction]
         public virtual IDataContext CreateDC(bool isLog = false)
         {
@@ -409,7 +414,19 @@ namespace WalkingTec.Mvvm.Mvc
             {
                 cs = "defaultlog";
             }
-            return (IDataContext)GlobaInfo?.DataContextCI?.Invoke(new object[] { ConfigInfo?.ConnectionStrings?.Where(x => x.Key.ToLower() == cs).Select(x => x.Value).FirstOrDefault(), CurrentDbType ?? ConfigInfo.DbType });
+            return ConfigInfo.ConnectionStrings?.Where(x => x.Key.ToLower() == cs.ToLower()).FirstOrDefault()?.CreateDC();
+        }
+
+        /// <summary>
+        /// Create DataContext
+        /// </summary>
+        /// <param name="csName">ConnectionString key, "default" will be used if not set</param>
+        /// <returns>data context</returns>
+        [NonAction]
+        public virtual IDataContext CreateDC(string csName)
+        {
+            string cs = csName ?? "default";
+            return ConfigInfo.ConnectionStrings?.Where(x => x.Key.ToLower() == cs.ToLower()).FirstOrDefault()?.CreateDC();
         }
 
         #endregion

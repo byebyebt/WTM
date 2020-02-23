@@ -25,7 +25,7 @@
                         { "name": "/DP", "title": "数据权限", "jump": "/Global/DP" },
                         { "name": "/Route", "title": "路由", "jump": "/Global/Route" },
                         { "name": "/Route", "title": "多语言", "jump": "/Global/MultiLanguages" },
-                        { "name": "/Route", "title": "Jwt支持", "jump": "/Global/jwt" }
+                        { "name": "/Route", "title": "Jwt支持", "jump": "/Global/CookieAuthAndJwtAuth" }
                    ]
                 },
                 {
@@ -55,7 +55,8 @@
                             ]
                         },
                         { "name": "/Import", "title": "导入VM", "jump": "/VM/Import" },
-                        { "name": "/Batch", "title": "批量操作VM", "jump": "/VM/Batch" }
+                        { "name": "/Batch", "title": "批量操作VM", "jump": "/VM/Batch" },
+                        { "name": "/Transaction", "title": "事务", "jump": "/VM/Transaction" }
                     ]
                 },
                 {
