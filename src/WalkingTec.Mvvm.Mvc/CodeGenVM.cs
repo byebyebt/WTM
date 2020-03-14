@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -329,6 +330,21 @@ namespace WalkingTec.Mvvm.Mvc
 
         protected override void InitVM()
         {
+            if(string.IsNullOrEmpty(SelectedModel) == false)
+            {
+                foreach (var item in ConfigInfo.ConnectionStrings)
+                {
+                    var dc = item.CreateDC();
+                    Type t = typeof(DbSet<>).MakeGenericType(Type.GetType(SelectedModel));
+                    var exist = dc.GetType().GetProperties().Where(x => x.PropertyType == t).FirstOrDefault();
+                    if(exist != null)
+                    {
+                        this.DC = dc;
+                    }
+                }
+
+            }
+
             FieldList = new CodeGenListVM();
             FieldList.CopyContext(this);
         }
@@ -564,7 +580,10 @@ namespace WalkingTec.Mvvm.Mvc
                         default:
                             break;
                     }
-
+                    if(typename == "DateTime" || typename == "DateTime?")
+                    {
+                        typename = "DateRange";
+                    }
                     prostring += $@"
         public {typename} {proname} {{ get; set; }}";
                 }
@@ -663,6 +682,11 @@ namespace WalkingTec.Mvvm.Mvc
                             {
                                 wherestring += $@"
                 .CheckContain(Searcher.{pro.FieldName}, x=>x.{pro.FieldName})";
+                            }
+                            else if(proType == typeof(DateTime) || proType == typeof(DateTime?))
+                            {
+                                wherestring += $@"
+                .CheckBetween(Searcher.{pro.FieldName}?.GetStartTime(), Searcher.{pro.FieldName}?.GetEndTime(), x => x.{pro.FieldName}, includeMax: false)";
                             }
                             else
                             {
@@ -948,7 +972,7 @@ namespace WalkingTec.Mvvm.Mvc
                         }
                         if (checktype == typeof(DateTime))
                         {
-                            fieldstr.Append($@"<wt:datetime field=""Searcher.{item.FieldName}"" />");
+                            fieldstr.Append($@"<wt:datetime field=""Searcher.{item.FieldName}"" range=""true"" />");
                         }
                         if (checktype.IsEnum() || checktype.IsBool())
                         {

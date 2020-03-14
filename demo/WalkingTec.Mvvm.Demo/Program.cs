@@ -14,6 +14,7 @@ using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Demo.Models;
 using WalkingTec.Mvvm.Mvc;
 using WalkingTec.Mvvm.TagHelpers.LayUI;
+using Microsoft.Extensions.Logging;
 
 namespace WalkingTec.Mvvm.Demo
 {
@@ -43,14 +44,21 @@ namespace WalkingTec.Mvvm.Demo
 
             return
                 Host.CreateDefaultBuilder(args)
-                 .ConfigureWebHostDefaults(webBuilder =>
+                 .ConfigureLogging((hostingContext, logging) =>
+                 {
+                     logging.ClearProviders();
+                     logging.AddConsole();
+                     logging.AddWTMLogger();
+                 })
+                .ConfigureWebHostDefaults(webBuilder =>
                  {
                      webBuilder.ConfigureServices((hostingCtx, x) =>
                     {
                         var pris = new List<IDataPrivilege>
                         {
                             new DataPrivilegeInfo<School>("学校", y => y.SchoolName),
-                            new DataPrivilegeInfo<Major>("专业", y => y.MajorName)
+                            new DataPrivilegeInfo<Major>("专业", y => y.MajorName),
+                            new DataPrivilegeInfo<FrameworkMenu>("菜单", y=>y.PageName)
                         };
                         x.AddFrameworkService(dataPrivilegeSettings: pris, webHostBuilderContext: hostingCtx,CsSector:CSSelector);
                         x.AddLayui();
